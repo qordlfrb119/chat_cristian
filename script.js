@@ -3,7 +3,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const userInput = document.getElementById("user-input");
   const chatBox = document.getElementById("chat-box");
 
-  // 날짜 확인용 키 만들기 (YYYY-MM-DD)
   const todayKey = new Date().toISOString().split('T')[0];
 
   if (localStorage.getItem(todayKey)) {
@@ -20,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
     appendMessage("user", message);
     userInput.value = "";
 
-    const loading = appendMessage("bot", "응답을 준비 중입니다...");
+    const loading = appendMessage("bot", "🙏 응답을 준비 중입니다...");
 
     try {
       const res = await fetch("https://chatgpt-server-1-bghh.onrender.com/chat", {
@@ -32,7 +31,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const data = await res.json();
       loading.textContent = data.reply;
 
-      // ✅ 오늘 응답한 기록 저장
       localStorage.setItem(todayKey, "used");
       chatForm.querySelector("button").disabled = true;
       userInput.disabled = true;
@@ -50,6 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return messageDiv;
   }
 });
+
 
 
 

@@ -1,19 +1,55 @@
-async function sendMessage() {
-  const message = document.getElementById('message').value;
-  const responseBox = document.getElementById('response');
+document.addEventListener("DOMContentLoaded", () => {
+  const chatForm = document.getElementById("chat-form");
+  const userInput = document.getElementById("user-input");
+  const chatBox = document.getElementById("chat-box");
 
-  responseBox.textContent = '🙏 응답 대기 중...';
+  // 날짜 확인용 키 만들기 (YYYY-MM-DD)
+  const todayKey = new Date().toISOString().split('T')[0];
 
-  try {
-    const res = await fetch('https://chatgpt-server-1-bghh.onrender.com/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message }),
-    });
-
-    const data = await res.json();
-    responseBox.textContent = data.reply;
-  } catch (err) {
-    responseBox.textContent = '❌ 오류 발생: ' + err.message;
+  if (localStorage.getItem(todayKey)) {
+    alert("🙏 오늘은 이미 응답을 받으셨습니다. 내일 다시 찾아와 주세요.");
+    chatForm.querySelector("button").disabled = true;
+    userInput.disabled = true;
   }
-}
+
+  chatForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const message = userInput.value.trim();
+    if (!message) return;
+
+    appendMessage("user", message);
+    userInput.value = "";
+
+    const loading = appendMessage("bot", "응답을 준비 중입니다...");
+
+    try {
+      const res = await fetch("https://chatgpt-server-1-bghh.onrender.com/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message }),
+      });
+
+      const data = await res.json();
+      loading.textContent = data.reply;
+
+      // ✅ 오늘 응답한 기록 저장
+      localStorage.setItem(todayKey, "used");
+      chatForm.querySelector("button").disabled = true;
+      userInput.disabled = true;
+    } catch (err) {
+      loading.textContent = "❌ 오류 발생: " + err.message;
+    }
+  });
+
+  function appendMessage(sender, text) {
+    const messageDiv = document.createElement("div");
+    messageDiv.className = sender === "user" ? "user-message" : "bot-message";
+    messageDiv.textContent = text;
+    chatBox.appendChild(messageDiv);
+    chatBox.scrollTop = chatBox.scrollHeight;
+    return messageDiv;
+  }
+});
+
+
+
